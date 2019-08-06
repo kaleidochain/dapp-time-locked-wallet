@@ -2,7 +2,6 @@
   <div id="Head">
   <v-toolbar color="blue darken-3" app > <!-- app -->
 
-      <v-spacer></v-spacer><v-spacer></v-spacer>
       <!-- class="hidden-sm-and-down" -->
       <v-toolbar-items >
         <v-menu offset-y>
@@ -64,6 +63,7 @@
               dark
               v-model="account"
               v-if="!isonline"
+              label="address"
               style="width:380px;"
             ></v-text-field>
         <v-btn flat icon v-if="!isonline" color="white" @click="search">
@@ -71,8 +71,8 @@
         </v-btn>
       </v-toolbar-items> 
 
-      <v-toolbar-items  class="hidden-sm-and-down" >
-        <span style="color:white;margin: 0 10px;">          
+      <v-toolbar-items  class="hidden-sm-and-down"  style="min-width: 65px;">
+        <span style="color:white;margin: 0 10px;" v-if="balance>0">          
           <br>
           {{(balance/1e18).toFixed(3)}} KAL
         </span>
@@ -104,7 +104,7 @@
       isonline:false,
       loading:false,
       balance:0.00,
-      account:"0x00000000000000000000000000000000000000000",
+      account:"",
       web3:null,
       path:"",
     }),
