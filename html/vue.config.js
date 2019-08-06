@@ -1,5 +1,5 @@
 module.exports = {
-    baseUrl:'/unlock',
+    baseUrl:'./',
     devServer: {
         
         proxy: {
