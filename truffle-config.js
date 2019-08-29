@@ -24,13 +24,19 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 var HDWalletProvider = require("truffle-hdwallet-provider");
-var providerproduct = new HDWalletProvider("f1375feeb6aef1838f7e7ef448fe3308e17884fe334e92aa71a5e1642a394768", "http://106.75.184.214:8547");
-var provider214 = new HDWalletProvider("f1375feeb6aef1838f7e7ef448fe3308e17884fe334e92aa71a5e1642a394768", "http://192.168.0.214:8545");
+var testpri = "xxx"
+var testaddr = "0x0557d37d996b123fc1799b17b417a6e5d6773038"
+var mainetpri = "xxx";
+var mainnetaddr="0xF919E83120B0C6699743cA363Ae31Dd5BA65a108";
+var providermainnet = new HDWalletProvider(mainetpri, "https://api.kalscan.io/mainnet");
 
-var provider213 = new HDWalletProvider("f1375feeb6aef1838f7e7ef448fe3308e17884fe334e92aa71a5e1642a394768", "http://192.168.0.213:8545");
-var provider212 = new HDWalletProvider("f1375feeb6aef1838f7e7ef448fe3308e17884fe334e92aa71a5e1642a394768", "http://192.168.0.212:8545");
-var provider211 = new HDWalletProvider("f1375feeb6aef1838f7e7ef448fe3308e17884fe334e92aa71a5e1642a394768", "http://192.168.0.211:8545");
-var providerlocal = new HDWalletProvider("f1375feeb6aef1838f7e7ef448fe3308e17884fe334e92aa71a5e1642a394768", "http://127.0.0.1:8545");
+var providerproduct = new HDWalletProvider(testpri, "http://106.75.184.214:8547");
+var provider214 = new HDWalletProvider(testpri, "http://192.168.0.214:8545");
+var provider213 = new HDWalletProvider(testpri, "http://192.168.0.213:8545");
+var provider212 = new HDWalletProvider(testpri, "http://192.168.0.212:8545");
+var provider211 = new HDWalletProvider(testpri, "http://192.168.0.211:8545");
+var providerlocal = new HDWalletProvider(testpri, "http://127.0.0.1:8545");
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -55,37 +61,45 @@ module.exports = {
      provider:providerlocal,
      network_id: "*",       // Any network (default: none)
      gas: 4500000,
-     from:"0x0557d37d996b123fc1799b17b417a6e5d6773038",
+     from:testaddr,
     },
+    mainnet: {
+      //  host: "127.0.0.1",     // Localhost (default: none)
+      //  port: 8545,            // Standard Ethereum port (default: none)
+       provider:providermainnet,
+       network_id: "*",       // Any network (default: none)
+       gas: 4500000,
+       from:mainnetaddr,
+      },
     product: {
       provider:providerproduct,
       network_id: "*",       // Any network (default: none)
       gas: 4500000,
-      from:"0x0557d37d996b123fc1799b17b417a6e5d6773038",
+      from:testaddr,
      },
      testnet: {
       provider:provider211,
       network_id: "*",       // Any network (default: none)
       gas: 4500000,
-      from:"0x0557d37d996b123fc1799b17b417a6e5d6773038",
+      from:testaddr,
      },
      testnet2: {
       provider:provider212,
       network_id: "*",       // Any network (default: none)
       gas: 4500000,
-      from:"0x0557d37d996b123fc1799b17b417a6e5d6773038",
+      from:testaddr,
      },
      testnet3: {
       provider:provider213,
       network_id: "*",       // Any network (default: none)
       gas: 4500000,
-      from:"0x0557d37d996b123fc1799b17b417a6e5d6773038",
+      from:testaddr,
      },
      testnet4: {
       provider:provider214,
       network_id: "*",       // Any network (default: none)
       gas: 4500000,
-      from:"0x0557d37d996b123fc1799b17b417a6e5d6773038",
+      from:testaddr,
      }
     // Another network with more advanced options...
     // advanced: {
