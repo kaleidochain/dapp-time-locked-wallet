@@ -17,15 +17,11 @@ window.mineraddress = "0x1000000000000000000000000000000000000002";
 
 //window.host = "http://localhost:8080/xbone";
 //&& web3.eth.net.getId() == 889
-if(document.domain == "http://localhost" ){
-  window.host = "https://api.kalscan.io/testnet";
-  window.FactoryAddress="0x3192fdaff2c85404a27b6b98390a027e2174bdfa";
-  window.networkid = 889;
-} else {
-  window.host = "https://api.kalscan.io/mainnet";
-  window.FactoryAddress="0x2d71161620428b30365a5bde023c935ab8c6e939";
-  window.networkid = 888;
-}
+
+window.host = "https://api.kalscan.io/mainnet";
+window.FactoryAddress="0xb532bf9d8fe21ac85bb1c44a98c70bd01859493a";
+window.networkid = 888;
+
 Vue.config.productionTip = false
 new Vue({
   el:'#app',
