@@ -748,7 +748,7 @@
 
       var netid = await tmpweb3.eth.net.getId();
       if(netid != window.networkid){
-        alert("请选择kaleido测试网络")
+        alert("请选择Kaleidochain网络")
       }
 
       var factory = new tmpweb3.eth.Contract(window.Factoryabi,window.FactoryAddress,{from:Address});
