@@ -4,7 +4,7 @@ import "./TimeLockedWalletFactory.sol";
 contract ManageableTimeLockedWalletFactory is TimeLockedWalletFactory{
     mapping(address => address[]) public walletsOfManager;
 
-    function create(address _manager,address _owner,uint64 s,uint64 i,uint64 n,uint64 e) public returns(bool) {
+    function create(address _manager,address _owner,uint64 s,uint64 i,uint n,uint64 e) public returns(bool) {
         address wallet = new ManageableTimeLockedWallet(_owner,_manager,s,i,n,e);
         walletsOfCreator[msg.sender].push(wallet);
         walletsOfOwner[_owner].push(wallet);

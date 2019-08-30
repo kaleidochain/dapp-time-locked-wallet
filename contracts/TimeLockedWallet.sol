@@ -22,7 +22,7 @@ contract TimeLockedWallet {
         _;
     }
 
-    constructor(address _owner, uint64 s, uint64 i, uint64 n, uint64 e) public {
+    constructor(address _owner, uint64 s, uint64 i, uint n, uint64 e) public {
         require(_owner != address(0x0));
         require(e > s);
         require(i > 0);

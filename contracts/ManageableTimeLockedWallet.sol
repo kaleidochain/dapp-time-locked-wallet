@@ -13,7 +13,7 @@ contract ManageableTimeLockedWallet is TimeLockedWallet{
         require(msg.sender == manager);
         _;
     }
-    constructor(address _owner,address _manager,uint64 s,uint64 i,uint64 n,uint64 e) TimeLockedWallet(_owner,s,i,n,e) public {
+    constructor(address _owner,address _manager,uint64 s,uint64 i,uint n,uint64 e) TimeLockedWallet(_owner,s,i,n,e) public {
         require(_owner != address(0x0));
         factory = msg.sender;
         manager = _manager;
