@@ -8,7 +8,7 @@ contract TimeLockedWalletFactory {
     mapping(address => address[]) public walletsOfOwner;
     event Instantiation(address sender,address dapp);
 
-    function create(address owner,uint64 s,uint64 i,uint64 n,uint64 e) public returns(bool){
+    function create(address owner,uint64 s,uint64 i,uint n,uint64 e) public returns(bool){
         address wallet = new TimeLockedWallet(owner,s,i,n,e);
         walletsOfCreator[msg.sender].push(wallet);
         walletsOfOwner[owner].push(wallet);

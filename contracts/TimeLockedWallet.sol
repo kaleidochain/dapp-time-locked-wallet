@@ -22,7 +22,7 @@ contract TimeLockedWallet {
         _;
     }
 
-    constructor(address _owner, uint64 s, uint64 i, uint64 n, uint64 e) public {
+    constructor(address _owner, uint64 s, uint64 i, uint n, uint64 e) public {
         require(_owner != address(0x0));
         require(e > s);
         require(i > 0);
@@ -68,7 +68,7 @@ contract TimeLockedWallet {
     }
 
     function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public onlyOwner returns(bool suc){
-        suc = Miner(0x100000000000000000000000000002).set(start, lifespan, address(this), vrfVerifier,voteVerifier);
+        suc = Miner(0x1000000000000000000000000000000000000002).set(start, lifespan, address(this), vrfVerifier,voteVerifier);
         if(suc){
             emit MinerRegistered(owner);
         }
