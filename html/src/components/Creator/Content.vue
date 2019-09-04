@@ -55,22 +55,22 @@
                         {{todate(props.item.timeToUnlockAll)}}
                       </td>
                       
-                      <td class="text-xs-center">{{ props.item.balance/1e18 }}
+                      <td class="text-xs-center">{{ web3.utils.fromWei(props.item.balance) }}
                           <v-btn :disabled="viewmodel" small flat outline color="info" @click="dialog_sendTransaction = true;dialog_item=props.item;" style="height: 25px;min-width: 40px;font-size: 12px;">
                             转入
                           </v-btn>
 
                       </td>
-                      <td class="text-xs-center">{{ (props.item.balance*1+props.item.totalWithdrawals*1-props.item.unlocked*1)/1e18 }}
+                      <td class="text-xs-center">{{ web3.utils.fromWei(props.item.balance)*1+web3.utils.fromWei(props.item.totalWithdrawals)*1-web3.utils.fromWei(props.item.unlocked)*1 }}
                           <!-- <v-btn  small flat icon outline color="error" @click="dialog_revoke = true;dialog_item=props.item;" style="margin:0;width:45px;">
                             撤回
                           </v-btn> -->
                       </td>
-                      <td class="text-xs-center">{{ (props.item.unlocked-props.item.totalWithdrawals)/1e18 }}
+                      <td class="text-xs-center">{{ (web3.utils.fromWei(props.item.unlocked)*1-web3.utils.fromWei(props.item.totalWithdrawals)*1) }}
                         <!-- <v-btn  small flat icon color="info" outline style="padding:0;margin:0;width:50px" @click="dialog_withdraw = true;dialog_item=props.item;">提取</v-btn> -->
                       </td>
                       <td class="text-xs-center">
-                          {{(props.item.unlocked-props.item.totalWithdrawals)/1e18}}
+                          {{ web3.utils.fromWei(props.item.totalWithdrawals) }}
                       </td>
                     </template>
                   </v-data-table>
@@ -582,7 +582,8 @@
     var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:Address});
     var Address = vue.account;
     var index = vue.walletlist.indexOf(vue.dialog_item);
-    var value = vue.wallet.revoke*1e18;
+
+    var value = tmpweb3.utils.toWei(vue.wallet.revoke.toString(10));
     var ok = false;
     try{
       ok =  await wallet.methods.revoke(value).call({from:Address});
@@ -630,7 +631,7 @@
     var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:Address});
     var Address = vue.account;
     var index = vue.walletlist.indexOf(vue.dialog_item);
-    var value = vue.wallet.withdraw*1e18;
+    var value = tmpweb3.utils.toWei(vue.wallet.withdraw.toString(10));
 
     var ok = false;
     try{
@@ -681,10 +682,12 @@
             vue.wallet.Owner,
             TimeToStartUnlocking,
             vue.wallet.TimeInterval,
-            vue.wallet.AmountOfEachUnlock*1e18,
+            tmpweb3.utils.toWei(vue.wallet.AmountOfEachUnlock.toString(10)),
+       
             TimeToUnlockAll).call();
-        }catch(e){}
- 
+        }catch(e){
+          console.log(e)
+        }
 
         if(!ok){
             alert("create wallet failed!please check params");
@@ -697,7 +700,8 @@
             vue.wallet.Owner,
             TimeToStartUnlocking,
             vue.wallet.TimeInterval,
-            vue.wallet.AmountOfEachUnlock*1e18,
+            tmpweb3.utils.toWei(vue.wallet.AmountOfEachUnlock.toString(10)),
+            //vue.wallet.AmountOfEachUnlock*1e18,
             TimeToUnlockAll).encodeABI();
 
 

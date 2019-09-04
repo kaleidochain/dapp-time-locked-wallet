@@ -18,6 +18,7 @@ contract ManageableTimeLockedWallet is TimeLockedWallet{
         factory = msg.sender;
         manager = _manager;
     }
+    //manager revoke locked balance
     function revoke(uint _value) onlyManager public returns(bool){
         require(_value <= address(this).balance+totalWithdrawals-unlocked());
         msg.sender.transfer(_value);

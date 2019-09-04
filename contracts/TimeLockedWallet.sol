@@ -41,7 +41,7 @@ contract TimeLockedWallet {
         owner = _newOwner;
         return true;
     }
-
+    //all the unlocked balance(include withdrew)
     function unlocked() public view returns(uint256 released){
         uint64 t = uint64(now);
         if (t < timeToStartUnlocking+timeInterval) {
