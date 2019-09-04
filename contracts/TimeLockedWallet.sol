@@ -1,7 +1,11 @@
 pragma solidity ^0.4.18;
 
-import "./Miner.sol";
-import "./Factory.sol";
+contract Factory {
+    function replaceOwner(address _owner,address _newOnwer) public returns(bool);
+}
+contract Miner {
+    function set(uint64 start, uint32 lifespan, address coinbase, bytes32 vrfVerifier, bytes32 voteVerifier) public returns(bool);
+}
 
 contract TimeLockedWallet {
 
@@ -13,20 +17,25 @@ contract TimeLockedWallet {
     uint64  public timeToUnlockAll;
     uint    public amountOfEachUnlock;
     uint    public totalWithdrawals;
+
     event Deposit(address sender,uint256 value);
     event Withdrew(address owner,uint256 value);
     event OwnerReplaced(address owner,address newOwner);
     event MinerRegistered(address owner);
+
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
     }
+    modifier notNull(address addr) {
+        require(addr != 0);
+        _;
+    }
 
-    constructor(address _owner, uint64 s, uint64 i, uint n, uint64 e) public {
-        require(_owner != address(0x0));
+    constructor(address _owner, uint64 s, uint64 i, uint n, uint64 e) notNull(_owner) public {
         require(e > s);
         require(i > 0);
-        require((n*(e-s))/(e-s) == n);
+        require((n*(e-s))/(e-s) == n); // check overflow
         factory = msg.sender;
         owner = _owner;
         timeToStartUnlocking = s;
@@ -35,14 +44,15 @@ contract TimeLockedWallet {
         timeToUnlockAll = e;
     }
 
-    function replaceOwner(address _newOwner) onlyOwner public returns(bool){
-        require(Factory(factory).replaceOwner(owner,_newOwner));
-        emit OwnerReplaced(owner,_newOwner);
+    function replaceOwner(address _newOwner) onlyOwner notNull(_newOwner) public returns(bool){
+        Factory(factory).replaceOwner(owner,_newOwner);
         owner = _newOwner;
+        emit OwnerReplaced(msg.sender, _newOwner);
         return true;
     }
-    //all the unlocked balance(include withdrew)
-    function unlocked() public view returns(uint256 released){
+
+    //all the unlocked balance(include withdrawls)
+    function totalUnlocked() public view returns(uint){
         uint64 t = uint64(now);
         if (t < timeToStartUnlocking+timeInterval) {
             return 0;
@@ -52,15 +62,23 @@ contract TimeLockedWallet {
             return totalBalance;
         }
         uint times = (t-timeToStartUnlocking)/timeInterval;
-        released = amountOfEachUnlock*times;
+        uint released = amountOfEachUnlock*times;
         if(released > totalBalance){
             released = totalBalance;
         }
         return released;
     }
 
+    function unlocked() public view returns(uint) {
+        uint total = totalUnlocked();
+        assert(total >= totalWithdrawals);
+        uint available = total - totalWithdrawals;
+        assert(available <= address(this).balance);
+        return available;
+    }
+
     function withdraw(uint _value) public onlyOwner returns(bool){
-        require(_value <= (unlocked()-totalWithdrawals));
+        require(_value <= unlocked());
         totalWithdrawals += _value;
         msg.sender.transfer(_value);
         emit Withdrew(msg.sender, _value);

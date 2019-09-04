@@ -12,15 +12,16 @@ contract TimeLockedWalletFactory {
         address wallet = new TimeLockedWallet(owner,s,i,n,e);
         walletsOfCreator[msg.sender].push(wallet);
         walletsOfOwner[owner].push(wallet);
-        emit Instantiation(msg.sender,wallet);
+        emit Instantiation(msg.sender, wallet);
         return true;
     }
 
-    function replaceOwner(address _owner,address _newOwner) public returns(bool){
-        if (remove(walletsOfOwner[_owner],msg.sender) == 0){
-            return false;
-        }
+    function replaceOwner(address _owner,address _newOwner) public returns(bool) {
+        uint n = remove(walletsOfOwner[_owner],msg.sender);
+        require(n != 0);
+
         walletsOfOwner[_newOwner].push(msg.sender);
+
         return true;
     }
 
@@ -51,6 +52,4 @@ contract TimeLockedWalletFactory {
         }
         return affected;
     }
-
-
 }
