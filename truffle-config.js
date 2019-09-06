@@ -100,6 +100,11 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
       gas: 4500000,
       from:testaddr,
+     },
+     test2:{
+      host: "192.168.0.212",
+      port: 8545,
+      network_id: "*" // Match any network id
      }
     // Another network with more advanced options...
     // advanced: {
