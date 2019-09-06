@@ -735,7 +735,8 @@
         vue.walletlist[index]["totalWithdrawals"] = await wallet.methods.totalWithdrawals().call();
         vue.walletlist[index]["balance"] = await tmpweb3.eth.getBalance(address),
         vue.walletlist[index]["unlocked"] = await wallet.methods.unlocked().call();
-        var isminer =  await miner.methods.isMinerOfHeight(height,address).call();
+        
+        var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
         if(!isminer){
           var minerinfoNext = await miner.methods.get(height+1e6,address).call();
           if(minerinfoNext[0] != 0){
@@ -785,8 +786,8 @@
               balance:await tmpweb3.eth.getBalance(wallets[i]),
               unlocked:await wallet.methods.unlocked().call(),
             })
-          var address = wallet[i];
-          var isminer =  await miner.methods.isMinerOfHeight(height,address).call();
+          var address = wallets[i];
+          var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
           if(!isminer){
             var minerinfoNext = await miner.methods.get(height+1e6,address).call();
             if(minerinfoNext[0] != 0){
@@ -843,7 +844,7 @@
                   unlocked:await wallet.methods.unlocked().call(),
                 })
                 var address = wallets[i];
-                var isminer =  await miner.methods.isMinerOfHeight(height,address).call();
+                var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
                 if(!isminer){
                   var minerinfoNext = await miner.methods.get(height+1e6,address).call();
                   if(minerinfoNext[0] != 0){

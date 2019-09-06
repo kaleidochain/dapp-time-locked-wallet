@@ -739,7 +739,7 @@
         var address = vue.walletlist[index]["address"];
         vue.walletlist[index]["owner"]      = await wallet.methods.owner().call();
         vue.walletlist[index]["manager"]    = await wallet.methods.manager().call();
-        vue.walletlist[index]["miner"]      = await miner.methods.isMinerOfHeight(height,address).call();
+        vue.walletlist[index]["miner"]      = await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
         vue.walletlist[index]["amountOfEachUnlock"] = await wallet.methods.amountOfEachUnlock().call();
         vue.walletlist[index]["totalWithdrawals"] = await wallet.methods.totalWithdrawals().call();
         vue.walletlist[index]["balance"] = await tmpweb3.eth.getBalance(address),
@@ -788,7 +788,6 @@
   function _newWlletEvent(vue){
       if(vue.viewmodel){return true;}
       var tmpweb3 = vue.web3;
-      
       var factory = new tmpweb3.eth.Contract(window.Factoryabi,window.FactoryAddress,{from: vue.account});
       factory.events.Instantiation({},async function(error,event){
           var lwallet = vue.walletlist.length;
