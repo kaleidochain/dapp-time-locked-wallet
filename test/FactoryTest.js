@@ -21,6 +21,8 @@ contract('Factory contract',(accounts)=>{
 //success
         var succ = await factory.create.call(manager,owner,s,i,n,e);
         assert(succ);
+        var receipt = await factory.create(manager,owner,s,i,n,e);
+        console.log(receipt)
 //require(i>0)
         i = 0;succ = false;        
         try{
@@ -52,7 +54,6 @@ contract('Factory contract',(accounts)=>{
         manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
         n=0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
         e = s + 0xfffffff
-        console.log(n,e)
         try{
             succ = await factory.create.call(manager,owner,s,i,n,e);
         }catch(e){}

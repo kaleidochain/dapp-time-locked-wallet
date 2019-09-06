@@ -61,12 +61,12 @@
                           </v-btn>
 
                       </td>
-                      <td class="text-xs-center">{{ web3.utils.fromWei(props.item.balance)*1+web3.utils.fromWei(props.item.totalWithdrawals)*1-web3.utils.fromWei(props.item.unlocked)*1 }}
+                      <td class="text-xs-center">{{ web3.utils.fromWei(props.item.balance)*1-web3.utils.fromWei(props.item.unlocked)*1 }}
                           <!-- <v-btn  small flat icon outline color="error" @click="dialog_revoke = true;dialog_item=props.item;" style="margin:0;width:45px;">
                             撤回
                           </v-btn> -->
                       </td>
-                      <td class="text-xs-center">{{ (web3.utils.fromWei(props.item.unlocked)*1-web3.utils.fromWei(props.item.totalWithdrawals)*1) }}
+                      <td class="text-xs-center">{{ web3.utils.fromWei(props.item.unlocked)*1 }}
                         <!-- <v-btn  small flat icon color="info" outline style="padding:0;margin:0;width:50px" @click="dialog_withdraw = true;dialog_item=props.item;">提取</v-btn> -->
                       </td>
                       <td class="text-xs-center">
@@ -230,7 +230,8 @@
         { text: 'UnlockAll', value: 'timeToUnlockAll',sortable: false ,align: 'center'},
         
         { text: 'Balance (KAL)', value: 'balance',sortable: false },
-        { text: '待解锁 (KAL)', value: 'balance',sortable: false },
+        //balance - unlocked;
+        { text: '待解锁 (KAL)', value: 'locked',sortable: false },
         { text: '待提取 (KAL)', value: 'unlocked',sortable: false },
         { text: '已提取 (KAL)', value: 'totalWithdrawals',sortable: false },
       ]
@@ -683,9 +684,9 @@
             TimeToStartUnlocking,
             vue.wallet.TimeInterval,
             tmpweb3.utils.toWei(vue.wallet.AmountOfEachUnlock.toString(10)),
-       
             TimeToUnlockAll).call();
         }catch(e){
+          console.log(factory.options.address)
           console.log(e)
         }
 

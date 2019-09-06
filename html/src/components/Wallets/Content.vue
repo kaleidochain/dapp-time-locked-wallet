@@ -50,24 +50,26 @@
                         {{ props.item.timeInterval>=60?Math.floor((props.item.timeInterval%3600)/60)+"m ":""}}
                         {{ props.item.timeInterval%60+"s"}}
                       </td>
-                        <td class="text-xs-center" >
-                        
+
+                      <td class="text-xs-center" >
                         {{todate(props.item.timeToUnlockAll)}}
                       </td>
                       
-                      
-                      <td class="text-xs-center" >{{ web3.utils.fromWei(props.item.balance) }}
-                          <!-- <v-btn small flat icon outline color="info" @click="dialog_sendTransaction = true;dialog_item=props.item;" style="margin:0;width:45px;">
-                            转入
-                          </v-btn> -->
+                      <td class="text-xs-center" >
+                        {{ web3.utils.fromWei(props.item.balance) }}
                       </td>
-                      <td class="text-xs-center" >{{ web3.utils.fromWei(props.item.balance)*1+web3.utils.fromWei(props.item.totalWithdrawals)*1-web3.utils.fromWei(props.item.unlocked)*1 }}
-                       
-                          <!-- 待解锁 -->
+
+                      <td class="text-xs-center" >
+                        {{ web3.utils.fromWei(props.item.balance)*1-web3.utils.fromWei(props.item.unlocked)*1 }}<!-- 待解锁 -->
                       </td>
-                      <td class="text-xs-center" >{{ (web3.utils.fromWei(props.item.unlocked)*1-web3.utils.fromWei(props.item.totalWithdrawals)*1) }}
-                        <v-btn  :disabled="viewmodel"  small flat  color="info"  outline style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_withdraw=true;dialog_item=props.item;wallet.withdraw=(web3.utils.fromWei(props.item.unlocked)*1-web3.utils.fromWei(props.item.totalWithdrawals)*1)">提取</v-btn>
+
+                      <td class="text-xs-center" >
+                        {{ (web3.utils.fromWei(props.item.unlocked)*1) }}
+
+                        <v-btn  :disabled="viewmodel"  small flat  color="info"  outline style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_withdraw=true;dialog_item=props.item;wallet.withdraw=(web3.utils.fromWei(props.item.unlocked)*1)">提取</v-btn>
+                        
                       </td>
+
                       <td class="text-xs-center" >
                           {{ web3.utils.fromWei(props.item.totalWithdrawals) }}
                       </td>
@@ -230,7 +232,7 @@
         { text: 'UnlockAll', value: 'timeToUnlockAll',sortable: false ,align: 'center'},
         
         { text: 'Balance (KAL)', value: 'balance',sortable: false ,align: 'center'},
-        { text: '待解锁 (KAL)', value: 'balance',sortable: false ,align: 'center'},
+        { text: '待解锁 (KAL)', value: 'locked',sortable: false ,align: 'center'},
         { text: '待提取 (KAL)', value: 'unlocked',sortable: false ,align: 'center'},
         { text: '已提取 (KAL)', value: 'totalWithdrawals',sortable: false ,align: 'center'},
       ]
