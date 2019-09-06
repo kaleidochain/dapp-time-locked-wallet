@@ -1,4 +1,4 @@
-//run:truffle test ./test/FactoryTest.js --network test
+//run:truffle test ./test/FactoryTest.js --network test2
 const Factory = artifacts.require("./ManageableTimeLockedWalletFactory.sol");
 const Wallet = artifacts.require("./ManageableTimeLockedWallet.sol");
 let creator;
@@ -31,6 +31,8 @@ contract('Wallet contract',(accounts)=>{
 //replace manager
         succ = await wallet.replaceManager.call(accounts[3],{from:manager})
         assert(succ)
+        succ = await wallet.replaceManager.call(accounts[3],{from:accounts[5]})
+        assert(succ == false)
         await wallet.replaceManager(accounts[3],{from:manager})
         manager = accounts[3];
         wallets = await factory.getManagedWallets.call(manager);
@@ -38,6 +40,8 @@ contract('Wallet contract',(accounts)=>{
 //replace owner
         succ = await wallet.replaceOwner.call(accounts[4],{from:owner})
         assert(succ)
+        succ = await wallet.replaceOwner.call(accounts[4],{from:accounts[5]})
+        assert(succ == false)
         await wallet.replaceOwner(accounts[4],{from:owner});
         owner = accounts[4];
         wallets = await factory.getOwnedWallets(owner);
@@ -275,6 +279,9 @@ async function revokeTest(s,i,n,e,balance,accounts){
                 try{
                     succ = await wallet.revoke.call(revoke.add(1),{from:manager});
                 }catch(e){
+                    try{
+                        succ = await wallet.revoke.call(revoke,{from:eth.accounts[4]});
+                    }catch(e){}
                 }
                 assert(succ == false);
             }
@@ -338,6 +345,11 @@ async function withdrawTest(s,i,n,e,balance,accounts){
                     succ = false;
                     succ = await wallet.withdraw.call(unlocked,{from:owner});
                     assert(succ);
+                    succ = false;
+                    try{
+                        succ = await wallet.withdraw.call(unlocke,{from:accounts[4]})
+                    }catch(e){}
+                    assert(succ == false)
                 } else {
                     assert(  totalUnlocked+"" == totalWithdrawals.add(unlocked)+"");
                     succ = await wallet.withdraw.call(unlocked,{from:owner});
@@ -347,6 +359,13 @@ async function withdrawTest(s,i,n,e,balance,accounts){
                         succ = await wallet.withdraw.call(unlocked.add(1),{from:owner});
                     }catch(e){}
                     assert(succ == false);
+
+                    succ = false;
+                    try{
+                        succ = await wallet.withdraw.call(unlocke,{from:accounts[4]})
+                    }catch(e){}
+                    assert(succ == false)
+
                     if(unlocked > 0){
                         var receipt = await wallet.withdraw(unlocked,{from:owner});
                         assert(receipt.receipt.status*1 == 1);

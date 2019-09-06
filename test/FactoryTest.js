@@ -1,4 +1,4 @@
-//run:truffle test ./test/FactoryTest.js --network test
+//run:truffle test ./test/FactoryTest.js --network test2
 const Factory = artifacts.require("./ManageableTimeLockedWalletFactory.sol");
 let factory;
 let creator;
@@ -22,7 +22,6 @@ contract('Factory contract',(accounts)=>{
         var succ = await factory.create.call(manager,owner,s,i,n,e);
         assert(succ);
         var receipt = await factory.create(manager,owner,s,i,n,e);
-        console.log(receipt)
 //require(i>0)
         i = 0;succ = false;        
         try{
@@ -36,6 +35,13 @@ contract('Factory contract',(accounts)=>{
             succ = await factory.create.call(manager,owner,s,i,n,e);
         }catch(e){}
         assert(succ);
+//error manager
+        manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
+        manager = "ab";
+        try{
+            succ = await factory.create.call(manager,owner,s,i,n,e);
+        }catch(e){}
+        assert(succ == false);
 //empty owner
         manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
         owner = "";
