@@ -65,13 +65,13 @@
                           </v-btn>
 
                       </td>
-                      <td class="text-xs-center">{{ web3.utils.fromWei(props.item.balance)*1-web3.utils.fromWei(props.item.unlocked)*1 }}
-                          <v-btn :disabled="viewmodel" small flat  outline color="error" @click="dialog_revoke = true;dialog_item=props.item;wallet.revoke=(web3.utils.fromWei(props.item.balance)*1-web3.utils.fromWei(props.item.unlocked)*1);" style="height: 25px;min-width: 40px;font-size: 12px;">
+                      <td class="text-xs-center">{{ web3.utils.fromWei(web3.utils.toBN(props.item.balance).sub(web3.utils.toBN(props.item.unlocked))) }}
+                          <v-btn :disabled="viewmodel" small flat  outline color="error" @click="dialog_revoke = true;dialog_item=props.item;wallet.revoke=web3.utils.fromWei(web3.utils.toBN(props.item.balance).sub(web3.utils.toBN(props.item.unlocked)));" style="height: 25px;min-width: 40px;font-size: 12px;">
                             撤回
                             <!-- <v-icon>reply</v-icon> -->
                           </v-btn>
                       </td>
-                      <td class="text-xs-center">{{ (web3.utils.fromWei(props.item.unlocked)*1) }}
+                      <td class="text-xs-center">{{ (web3.utils.fromWei(props.item.unlocked)) }}
                         <!-- <v-btn  small flat icon color="info" outline style="padding:0;margin:0;width:50px" @click="dialog_withdraw = true;dialog_item=props.item;">提取</v-btn> -->
                       </td>
                       <td class="text-xs-center">
@@ -551,11 +551,11 @@
             alert("Insufficient Balance");
             return;
         }
-        var value = vue.wallet.Value*1e18;//new window.BN(vue.wallet.Value*1e18,10);window.
-
+        var value = tmpweb3.utils.toWei(vue.wallet.Value);//new window.BN(vue.wallet.Value*1e18,10);window.
+        value = tmpweb3.utils.toBN(value).toString(16);
         const transactionParameters = {
             to: walletAddress, // Required except during contract publications.
-            value: value.toString(16), // Only required to send ether to the recipient from the initiating external account.
+            value: value, // Only required to send ether to the recipient from the initiating external account.
             from:from,
             gas:"0x186a0",
         }
