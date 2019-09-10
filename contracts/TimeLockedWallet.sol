@@ -3,6 +3,7 @@ pragma solidity ^0.4.18;
 contract Factory {
     function replaceOwner(address _owner,address _newOnwer) public returns(bool);
     function replaceCreator(address _creator, address _newCreator) public returns(bool);
+    function replaceManager(address _manager,address _newManager) public returns(bool);
 }
 
 contract Miner {
@@ -14,6 +15,7 @@ contract TimeLockedWallet {
     address public factory;
     address public owner;
     address public creator;
+    address public manager;
 
     uint64 public timeToStartUnlocking;
     uint64 public timeInterval;
@@ -28,6 +30,13 @@ contract TimeLockedWallet {
     event CreatorReplaced(address creator,address newCreator);
     event MinerRegistered(address owner);
 
+    event Revocation(address _manager,uint _value);
+    event ManagerReplaced(address manager,address newManager);
+
+    modifier notNull(address addr) {
+        require(addr != 0);
+        _;
+    }
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
@@ -36,22 +45,23 @@ contract TimeLockedWallet {
         require(msg.sender == creator);
         _;
     }
-    modifier notNull(address addr) {
-        require(addr != 0);
-        _;
-    }
     modifier creatorOrOwner {
         require(msg.sender == owner || msg.sender == creator);
         _;
     }
+    modifier onlyManager {
+        require(msg.sender == manager);
+        _;
+    }
 
-    constructor(address _owner, address _creator, uint64 start, uint64 interval, uint64 _numInterval) public {
+    constructor(address _owner, address _creator, address _manager, uint64 start, uint64 interval, uint64 _numInterval) public notNull(_owner) notNull(_creator) {
         require(numInterval > 0);
         require(interval > 0);
 
         factory = msg.sender;
         owner = _owner;
         creator = _creator;
+        manager = _manager; // if 0x0, disable revoke function
 
         timeToStartUnlocking = start;
         timeInterval = interval;
@@ -72,18 +82,18 @@ contract TimeLockedWallet {
         Factory(factory).replaceCreator(creator, _newCreator);
         creator = _newCreator;
         emit CreatorReplaced(msg.sender, _newCreator);
+        return true;
     }
 
-    function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public onlyOwner returns(bool suc){
-        suc = Miner(0x1000000000000000000000000000000000000002).set(start, lifespan, address(this), vrfVerifier,voteVerifier);
-        if(suc){
-            emit MinerRegistered(owner);
-        }
-        return suc;
+    function replaceManager(address newManager) onlyManager public returns(bool){
+        Factory(factory).replaceManager(msg.sender,newManager);
+        manager = newManager;
+        emit ManagerReplaced(msg.sender, newManager);
+        return true;
     }
 
     // [0, numInterval]
-    function timeToInterval(uint64 t) internal view returns(uint) {
+    function timeToInterval(uint64 t) public view returns(uint) {
         if (t < timeToStartUnlocking) {
             return 0;
         }
@@ -94,7 +104,7 @@ contract TimeLockedWallet {
         return id;
     }
 
-    function amountToUnlock(uint64 currTime) internal view returns(uint) {
+    function amountToUnlock(uint64 currTime) public view returns(uint) {
         // already unlocked before
         if(currTime <= lastUnlockTime) {
             return 0;
@@ -133,10 +143,31 @@ contract TimeLockedWallet {
         return amount;
     }
 
-    // TODO: test failure
     function() public onlyCreator payable {
         if(msg.value > 0){
             emit Deposit(msg.sender, msg.value);
         }
     }
+
+    function revoke(uint _value) onlyManager public returns(bool){
+        if (msg.sender == 0x0) {
+            return false;
+        }
+
+        require(_value <= address(this).balance);
+        msg.sender.transfer(_value);
+
+        emit Revocation(msg.sender,_value);
+        return true;
+    }
+
+
+    function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public onlyOwner returns(bool suc){
+        suc = Miner(0x1000000000000000000000000000000000000002).set(start, lifespan, address(this), vrfVerifier,voteVerifier);
+        if(suc){
+            emit MinerRegistered(owner);
+        }
+        return suc;
+    }
+
 }
