@@ -42,10 +42,10 @@ contract TimeLockedWalletFactory {
     }
 
     function replaceCreator(address _creator, address _newCreator) public returns(bool) {
-        uint n = remove(walletsOfOwner[_creator], msg.sender);
+        uint n = remove(walletsOfCreator[_creator], msg.sender);
         require(n != 0);
 
-        walletsOfOwner[_newCreator].push(msg.sender);
+        walletsOfCreator[_newCreator].push(msg.sender);
 
         return true;
     }

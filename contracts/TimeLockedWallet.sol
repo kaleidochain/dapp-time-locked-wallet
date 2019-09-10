@@ -55,7 +55,7 @@ contract TimeLockedWallet {
     }
 
     constructor(address _owner, address _creator, address _manager, uint64 start, uint64 interval, uint64 _numInterval) public notNull(_owner) notNull(_creator) {
-        require(numInterval > 0);
+        require(_numInterval > 0);
         require(interval > 0);
 
         factory = msg.sender;
