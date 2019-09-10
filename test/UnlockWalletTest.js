@@ -85,6 +85,19 @@ contract('Wallet contract',(accounts)=>{
         await unlockedTest(s,i,n,e,balance,accounts);
 
     });
+    it("Wallet contract unlocked 3 test",async ()=>{
+        let now = Now();
+        let s = now;
+        let i = 10;
+        let n = web3.toWei(1);
+        let e = s+i*10;
+        let balance = 15;
+
+        s = now-30;
+        e = s+i*10;
+        await unlockedTest(s,i,n,e,balance,accounts);
+
+    });
 
     it("Wallet contract revoke test",async () =>{
         let now = Now();
@@ -119,7 +132,18 @@ contract('Wallet contract',(accounts)=>{
         balance = 20000;
         await revokeTest(s,i,n,e,balance,accounts);
     })
+    it("Wallet contract revoke 3 test",async () =>{
+        let now = Now();
+        let s = now;
+        let i = 10;
+        let n = web3.toWei(1);
+        let e = s+i*10;
+        let balance = 15;
 
+        s = now-30;
+        e = s+i*10;
+        await revokeTest(s,i,n,e,balance,accounts);
+    })
 
     it("Wallet contract withdraw test",async () =>{
         let now = Now();
@@ -154,7 +178,18 @@ contract('Wallet contract',(accounts)=>{
         balance = 20000;
         await withdrawTest(s,i,n,e,balance,accounts);
     })
-
+    it("Wallet contract withdraw 3 test",async () =>{
+        let now = Now();
+        let s = now;
+        let i = 10;
+        let n = web3.toWei(1);
+        let e = s+i*10;
+        let balance = 15;
+    
+        s = now-30;
+        e = s+i*10;
+        await withdrawTest(s,i,n,e,balance,accounts);
+    })
 
 
 

@@ -60,13 +60,13 @@
                       </td>
 
                       <td class="text-xs-center" >
-                        {{ web3.utils.fromWei(props.item.balance)*1-web3.utils.fromWei(props.item.unlocked)*1 }}<!-- 待解锁 -->
+                        {{ web3.utils.fromWei(web3.utils.toBN(props.item.balance).sub(web3.utils.toBN(props.item.unlocked))) }}<!-- 待解锁 -->
                       </td>
 
                       <td class="text-xs-center" >
-                        {{ (web3.utils.fromWei(props.item.unlocked)*1) }}
+                        {{ (web3.utils.fromWei(props.item.unlocked)) }}
 
-                        <v-btn  :disabled="viewmodel"  small flat  color="info"  outline style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_withdraw=true;dialog_item=props.item;wallet.withdraw=(web3.utils.fromWei(props.item.unlocked)*1)">提取</v-btn>
+                        <v-btn  :disabled="viewmodel"  small flat  color="info"  outline style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_withdraw=true;dialog_item=props.item;wallet.withdraw=(web3.utils.fromWei(props.item.unlocked))">提取</v-btn>
                         
                       </td>
 
@@ -543,15 +543,15 @@
         var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:from});
         var balance = await tmpweb3.eth.getBalance(from);
 
-        if (balance < vue.wallet.Value*1e18){
+        if (balance < tmpweb3.utils.toWei(vue.wallet.Value)){
             alert("Insufficient Balance");
             return;
         }
-        var value = vue.wallet.Value*1e18;//new window.BN(vue.wallet.Value*1e18,10);window.
-
+        var value = tmpweb3.utils.toWei(vue.wallet.Value);//new window.BN(vue.wallet.Value*1e18,10);window.
+        value = tmpweb3.utils.toBN(value).toString(16);
         const transactionParameters = {
             to: walletAddress, // Required except during contract publications.
-            value: value.toString(16), // Only required to send ether to the recipient from the initiating external account.
+            value: value, // Only required to send ether to the recipient from the initiating external account.
             from:from,
             gas:"0x186a0",
         }
@@ -735,7 +735,8 @@
         vue.walletlist[index]["totalWithdrawals"] = await wallet.methods.totalWithdrawals().call();
         vue.walletlist[index]["balance"] = await tmpweb3.eth.getBalance(address),
         vue.walletlist[index]["unlocked"] = await wallet.methods.unlocked().call();
-        var isminer =  await miner.methods.isMinerOfHeight(height,address).call();
+        vue.walletlist[index]["miner"] = "";
+        var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
         if(!isminer){
           var minerinfoNext = await miner.methods.get(height+1e6,address).call();
           if(minerinfoNext[0] != 0){
@@ -785,8 +786,8 @@
               balance:await tmpweb3.eth.getBalance(wallets[i]),
               unlocked:await wallet.methods.unlocked().call(),
             })
-          var address = wallet[i];
-          var isminer =  await miner.methods.isMinerOfHeight(height,address).call();
+          var address = wallets[i];
+          var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
           if(!isminer){
             var minerinfoNext = await miner.methods.get(height+1e6,address).call();
             if(minerinfoNext[0] != 0){
@@ -826,7 +827,6 @@
           var height = await tmpweb3.eth.getBlockNumber();
           var miner = new tmpweb3.eth.Contract(window.minerabi,window.mineraddress);
           for(var i=lwallet; i < wallets.length; i++){
-            console.log("newwalletevent",event,i)
               //var wallet = web3.eth.contract(window.Walletabi).at(wallets[i]);
               var wallet = new tmpweb3.eth.Contract(window.Walletabi,wallets[i]);
               vue.walletlist.push({
@@ -843,7 +843,7 @@
                   unlocked:await wallet.methods.unlocked().call(),
                 })
                 var address = wallets[i];
-                var isminer =  await miner.methods.isMinerOfHeight(height,address).call();
+                var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
                 if(!isminer){
                   var minerinfoNext = await miner.methods.get(height+1e6,address).call();
                   if(minerinfoNext[0] != 0){
