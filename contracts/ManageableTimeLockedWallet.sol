@@ -16,14 +16,16 @@ contract ManageableTimeLockedWallet is TimeLockedWallet{
         _;
     }
 
-    constructor(address _owner,address _manager,uint64 s,uint64 i,uint n,uint64 e) TimeLockedWallet(_owner,s,i,n,e) public {
-        factory = msg.sender;
+    constructor(address _owner, address _creator, address _manager, uint64 start, uint64 interval, uint64 _numInterval) TimeLockedWallet(_owner,_creator, start, interval, _numInterval) public {
         manager = _manager; // if 0x0, disable revoke function
     }
 
-    //manager revoke locked balance
     function revoke(uint _value) onlyManager public returns(bool){
-        require(_value <= address(this).balance-unlocked());
+        if (msg.sender == 0x0) {
+            return false;
+        }
+
+        require(_value <= address(this).balance);
         msg.sender.transfer(_value);
 
         emit Revocation(msg.sender,_value);

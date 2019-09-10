@@ -11,16 +11,19 @@ contract TimeLockedWallet {
 
     address public factory;
     address public owner;
+    address public creator;
 
-    uint64  public timeToStartUnlocking;
-    uint64  public timeInterval;
-    uint64  public timeToUnlockAll;
-    uint    public amountOfEachUnlock;
-    uint    public totalWithdrawals;
+    uint64 public timeToStartUnlocking;
+    uint64 public timeInterval;
+    uint64 public numInterval;
+    uint64 public lastUnlockTime;
+
+    uint public totalWithdrawals;
 
     event Deposit(address sender,uint256 value);
     event Withdrew(address owner,uint256 value);
     event OwnerReplaced(address owner,address newOwner);
+    event CreatorReplaced(address creator,address newCreator);
     event MinerRegistered(address owner);
 
     modifier onlyOwner {
@@ -31,58 +34,38 @@ contract TimeLockedWallet {
         require(addr != 0);
         _;
     }
+    modifier creatorOrOwner {
+        require(msg.sender == owner || msg.sender == creator);
+        _;
+    }
 
-    constructor(address _owner, uint64 s, uint64 i, uint n, uint64 e) notNull(_owner) public {
-        require(e > s);
-        require(i > 0);
-        require((n*(e-s))/(e-s) == n); // check overflow
-        factory = msg.sender;
+    constructor(address _owner, address _creator, uint64 start, uint64 interval, uint64 _numInterval) public {
+        require(numInterval > 0);
+        require(interval > 0);
+
+        factor = msg.sender;
         owner = _owner;
-        timeToStartUnlocking = s;
-        timeInterval = i;
-        amountOfEachUnlock = n;
-        timeToUnlockAll = e;
+        creator = _creator;
+
+        timeToStartUnlocking = start;
+        timeInterval = interval;
+        numInterval = _numInterval;
+        lastUnlockTime = 0;
+
+        totalWithdrawals = 0;
     }
 
     function replaceOwner(address _newOwner) onlyOwner notNull(_newOwner) public returns(bool){
-        Factory(factory).replaceOwner(owner,_newOwner);
+        Factory(factory).replaceOwner(owner, _newOwner);
         owner = _newOwner;
         emit OwnerReplaced(msg.sender, _newOwner);
         return true;
     }
 
-    //all the unlocked balance(include withdrawls)
-    function totalUnlocked() public view returns(uint){
-        uint64 t = uint64(now);
-        if (t < timeToStartUnlocking+timeInterval) {
-            return 0;
-        }
-        uint totalBalance = address(this).balance+totalWithdrawals;
-        if (t >= timeToUnlockAll){
-            return totalBalance;
-        }
-        uint times = (t-timeToStartUnlocking)/timeInterval;
-        uint released = amountOfEachUnlock*times;
-        if(released > totalBalance){
-            released = totalBalance;
-        }
-        return released;
-    }
-
-    function unlocked() public view returns(uint) {
-        uint total = totalUnlocked();
-        assert(total >= totalWithdrawals);
-        uint available = total - totalWithdrawals;
-        assert(available <= address(this).balance);
-        return available;
-    }
-
-    function withdraw(uint _value) public onlyOwner returns(bool){
-        require(_value <= unlocked());
-        totalWithdrawals += _value;
-        msg.sender.transfer(_value);
-        emit Withdrew(msg.sender, _value);
-        return true;
+    function replaceCreator(address _newCreator) onlyCreator notNull(_newCreator) public returns(bool) {
+        Factory(factory).replaceCreator(creator, _newCreator);
+        creator = _newCreator;
+        emit CreatorReplaced(msg.sender, _newCreator);
     }
 
     function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public onlyOwner returns(bool suc){
@@ -93,7 +76,54 @@ contract TimeLockedWallet {
         return suc;
     }
 
-    function() public payable {
+    // [0, numInterval]
+    function timeToInterval(uint64 t) internal view returns(uint) {
+        if (t < timeToStartUnlocking) {
+            return 0;
+        }
+        uint id = (t - timeToStartUnlocking) / timeInterval;
+        if (id > numInterval) {
+            id = numInterval;
+        }
+        return id;
+    }
+
+    function amountToUnlock() internal view returns(uint) {
+        if (now <= timeToStartUnlocking) {
+            return 0;
+        }
+
+        uint currInterval = timeToInterval(uint64(now));
+        uint lastInterval = timeToInterval(lastUnlockTime);
+        assert(currInterval >= lastInterval);
+
+        if (lastInterval >= numInterval) {
+            return address(this).balance;
+        }
+
+        uint leftInterval = numInterval - lastInterval;
+        uint amount = address(this).balance * (currInterval - lastInterval) / leftInterval;
+        return amount;
+    }
+
+    function unlock() public creatorOrOwner returns(uint) {
+        uint amount = amountToUnlock();
+        if (amount == 0) {
+            return 0;
+        }
+        require(amount <= address(this).balance);
+
+        lastUnlockTime = now; //critical update
+
+        totalWithdrawals += amount;
+        owner.transfer(amount);
+        emit Withdrew(owner, amount);
+
+        return amount;
+    }
+
+    // TODO: test failure
+    function() public onlyCreator payable {
         if(msg.value > 0){
             emit Deposit(msg.sender, msg.value);
         }

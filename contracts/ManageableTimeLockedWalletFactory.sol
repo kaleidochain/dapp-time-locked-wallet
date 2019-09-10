@@ -6,8 +6,9 @@ import "./TimeLockedWalletFactory.sol";
 contract ManageableTimeLockedWalletFactory is TimeLockedWalletFactory{
     mapping(address => address[]) public walletsOfManager;
 
-    function create(address _manager,address _owner,uint64 s,uint64 i,uint n,uint64 e) public returns(bool) {
-        address wallet = new ManageableTimeLockedWallet(_owner,_manager,s,i,n,e);
+    function create(address _owner, address _manager, uint64 start, uint64 interval, uint64 _numInterval) public returns(bool) {
+        address wallet = new ManageableTimeLockedWallet(_owner, msg.sender, _manager, start, interval, _numInterval);
+
         walletsOfCreator[msg.sender].push(wallet);
         walletsOfOwner[_owner].push(wallet);
 
@@ -29,11 +30,11 @@ contract ManageableTimeLockedWalletFactory is TimeLockedWalletFactory{
         return true;
     }
 
-    function getManagedCount(address _manager)public view returns(uint){
+    function getManagedCount(address _manager) public view returns(uint){
         return walletsOfManager[_manager].length;
     }
 
-    function getManagedWallets(address _manager)public view returns(address[]){
+    function getManagedWallets(address _manager) public view returns(address[]){
         return walletsOfManager[_manager];
     }
 }
