@@ -19,7 +19,7 @@ contract TimeLockedWalletFactory {
     }
 
     function replaceOwner(address _owner, address _newOwner) public returns(bool) {
-        uint n = remove(walletsOfOwner[_owner],msg.sender);
+        uint n = remove(walletsOfOwner[_owner], msg.sender);
         require(n != 0);
 
         walletsOfOwner[_newOwner].push(msg.sender);
@@ -36,10 +36,10 @@ contract TimeLockedWalletFactory {
     }
 
     function replaceCreator(address _creator, address _newCreator) public returns(bool) {
-        uint n = remove(walletsOfOwner[_creator],msg.sender);
+        uint n = remove(walletsOfOwner[_creator], msg.sender);
         require(n != 0);
 
-        walletsOfOwner[_creator].push(msg.sender);
+        walletsOfOwner[_newCreator].push(msg.sender);
 
         return true;
     }

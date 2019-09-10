@@ -2,7 +2,9 @@ pragma solidity ^0.4.18;
 
 contract Factory {
     function replaceOwner(address _owner,address _newOnwer) public returns(bool);
+    function replaceCreator(address _creator, address _newCreator) public returns(bool);
 }
+
 contract Miner {
     function set(uint64 start, uint32 lifespan, address coinbase, bytes32 vrfVerifier, bytes32 voteVerifier) public returns(bool);
 }
@@ -30,6 +32,10 @@ contract TimeLockedWallet {
         require(msg.sender == owner);
         _;
     }
+    modifier onlyCreator {
+        require(msg.sender == creator);
+        _;
+    }
     modifier notNull(address addr) {
         require(addr != 0);
         _;
@@ -43,7 +49,7 @@ contract TimeLockedWallet {
         require(numInterval > 0);
         require(interval > 0);
 
-        factor = msg.sender;
+        factory = msg.sender;
         owner = _owner;
         creator = _creator;
 
@@ -88,17 +94,22 @@ contract TimeLockedWallet {
         return id;
     }
 
-    function amountToUnlock() internal view returns(uint) {
-        if (now <= timeToStartUnlocking) {
+    function amountToUnlock(uint64 currTime) internal view returns(uint) {
+        // already unlocked before
+        if(currTime <= lastUnlockTime) {
             return 0;
         }
 
-        uint currInterval = timeToInterval(uint64(now));
+        // already unlocked all
         uint lastInterval = timeToInterval(lastUnlockTime);
-        assert(currInterval >= lastInterval);
-
         if (lastInterval >= numInterval) {
             return address(this).balance;
+        }
+
+        // not start unlocking or already unlocked before
+        uint currInterval = timeToInterval(currTime);
+        if (currInterval <= lastInterval) {
+            return 0;
         }
 
         uint leftInterval = numInterval - lastInterval;
@@ -107,13 +118,13 @@ contract TimeLockedWallet {
     }
 
     function unlock() public creatorOrOwner returns(uint) {
-        uint amount = amountToUnlock();
+        uint amount = amountToUnlock(uint64(now));
         if (amount == 0) {
             return 0;
         }
         require(amount <= address(this).balance);
 
-        lastUnlockTime = now; //critical update
+        lastUnlockTime = uint64(now); //critical update
 
         totalWithdrawals += amount;
         owner.transfer(amount);
