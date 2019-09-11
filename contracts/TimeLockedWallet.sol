@@ -66,9 +66,6 @@ contract TimeLockedWallet {
         timeToStartUnlocking = start;
         timeInterval = interval;
         numInterval = _numInterval;
-        lastUnlockTime = 0;
-
-        totalWithdrawals = 0;
     }
 
     function replaceOwner(address _newOwner) onlyOwner notNull(_newOwner) public returns(bool){
@@ -153,7 +150,6 @@ contract TimeLockedWallet {
         if (msg.sender == 0x0) {
             return false;
         }
-
         require(_value <= address(this).balance);
         msg.sender.transfer(_value);
 

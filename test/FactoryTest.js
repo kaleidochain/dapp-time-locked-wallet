@@ -1,5 +1,6 @@
 //run:truffle test ./test/FactoryTest.js --network test2
-const Factory = artifacts.require("./ManageableTimeLockedWalletFactory.sol");
+const Factory = artifacts.require("./TimeLockedWalletFactory.sol");
+const Wallet = artifacts.require("./TimeLockedWallet.sol");
 let factory;
 let creator;
 
@@ -11,59 +12,84 @@ contract('Factory contract',(accounts)=>{
     
     it("Factory created contract is working well", async () => {
         let now = Now();
-        //create(address _manager,address _owner,uint64 s,uint64 i,uint n,uint64 e)
+        //create(address _owner, address _manager, uint64 start, uint64 interval, uint64 _numInterval)
         let manager = accounts[1];
         let owner = accounts[2];
-        let s = now;
-        let i = 10;
-        let n = web3.toWei(1500);
-        let e = s+i*10;
+        let start = now;
+        let interval = 10; //时间间隔
+        let numInterval = 10; //解锁次数
 //success
-        var succ = await factory.create.call(manager,owner,s,i,n,e);
+        var succ = await factory.create.call(owner,manager,start,interval,numInterval,{from:creator});
         assert(succ);
-        var receipt = await factory.create(manager,owner,s,i,n,e);
-//require(i>0)
-        i = 0;succ = false;        
+//require(interval>0)
+        manager = accounts[1];owner = accounts[2];start = now;interval = 10;numInterval = 10;succ = false;
+        
+        interval = 0;
         try{
-            succ = await factory.create.call(manager,owner,s,i,n,e);
+            succ = await factory.create.call(owner,manager,start,interval,numInterval);
         }catch(e){}
         assert(succ == false);
+//require(numInterval>0)
+        manager = accounts[1];owner = accounts[2];start = now;interval = 10;numInterval = 10;succ = false;
+        
+        numInterval = 0;  
+        try{
+            succ = await factory.create.call(owner,manager,start,interval,numInterval);
+        }catch(e){}
+        assert(succ == false); 
 //empty mananger
-        manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
+        manager = accounts[1];owner = accounts[2];start = now;interval = 10;numInterval = 10;succ = false;
+
         manager = "";
         try{
-            succ = await factory.create.call(manager,owner,s,i,n,e);
+            succ = await factory.create.call(owner,manager,start,interval,numInterval);
         }catch(e){}
         assert(succ);
 //error manager
-        manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
-        manager = "ab";
+        manager = accounts[1];owner = accounts[2];start = now;interval = 10;numInterval = 10;succ = false;
+
+        manager = "ab"; 
         try{
-            succ = await factory.create.call(manager,owner,s,i,n,e);
+            succ = await factory.create.call(owner,manager,start,interval,numInterval);
         }catch(e){}
         assert(succ == false);
 //empty owner
         manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
         owner = "";
         try{
-            succ = await factory.create.call(manager,owner,s,i,n,e);
+            succ = await factory.create.call(owner,manager,start,interval,numInterval);
         }catch(e){}
         assert(succ == false);
-//require(e>s)
-        manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
-        e = s;
+//send kal
+        manager = accounts[1];owner = accounts[2];start = now;interval = 10;numInterval = 10;succ = false;
+        
+        var ownerCountbf = await factory.getOwnedCount.call(owner);
+        var managerCountbf = await factory.getManagedCount.call(manager);
+        var creatorCountbf = await factory.getCreatedCount.call(creator);
+        
+        var receipt = await factory.create(owner,manager,start,interval,numInterval,{from:creator});
+        assert(receipt.receipt.status*1 == 1);
+
+        var ownerCountaf = await factory.getOwnedCount.call(owner);
+        var managerCountaf = await factory.getManagedCount.call(manager);
+        var creatorCountaf = await factory.getCreatedCount.call(creator);
+      
+        assert( ownerCountaf.eq(ownerCountbf.add(1)) );
+        assert( managerCountaf.eq(managerCountbf.add(1)) );
+        assert( creatorCountaf.eq(creatorCountbf.add(1)) );
+
+        var wallets = await factory.getCreatedWallets.call(creator);
+        var walletAddress = wallets[wallets.length-1];
+        var wallet = await Wallet.at(walletAddress);
+//creator send kal(success)
+        var receipt = await wallet.sendTransaction({from:creator,value:web3.toWei(1),gas:1e7});
+        assert(receipt.receipt.status*1 == 1);
+//other address send kal(failure)
+        var receipt = null;
         try{
-            succ = await factory.create.call(manager,owner,s,i,n,e);
+            receipt = await wallet.sendTransaction({from:owner,value:1e18,gas:1e7});
         }catch(e){}
-        assert(succ == false);
-//require((n*(e-s))/(e-s) == n); // check overflow
-        manager = accounts[1];owner = accounts[2];s = now;i = 10;n = web3.toWei(1500);e = s+i*10;succ = false;
-        n=0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        e = s + 0xfffffff
-        try{
-            succ = await factory.create.call(manager,owner,s,i,n,e);
-        }catch(e){}
-        assert(succ == false);
+        assert(receipt ==  null || receipt.receipt.status*1 == 0);
     });
 });
 
