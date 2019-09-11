@@ -129,7 +129,7 @@ contract TimeLockedWallet {
         if (amount == 0) {
             return 0;
         }
-        require(amount <= address(this).balance);
+        assert(amount <= address(this).balance);
 
         lastUnlockTime = uint64(now); //critical update
 
