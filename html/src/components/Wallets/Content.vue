@@ -26,7 +26,7 @@
                       </td>
                       <td class="text-xs-center"><span style="vertical-align: middle;max-width: 80px; display: inline-block; overflow: hidden; text-overflow: ellipsis;">{{ props.item.owner }}</span>
                         <v-btn :disabled="viewmodel" small outline color="info" style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_replaceOwner = true;dialog_item=props.item;">
-                            修改
+                            编辑
                         </v-btn>
                       </td>
                       <!-- <td class="text-xs-center"><span style="vertical-align: middle;max-width: 80px; display: inline-block; overflow: hidden; text-overflow: ellipsis;">{{ props.item.manager }}</span>
@@ -49,24 +49,19 @@
                         {{ props.item.timeInterval>=3600?Math.floor((props.item.timeInterval%86400)/3600)+"h ":""}}
                         {{ props.item.timeInterval>=60?Math.floor((props.item.timeInterval%3600)/60)+"m ":""}}
                         {{ props.item.timeInterval%60+"s"}}
+                        * 
+                        {{props.item.numInterval}}
                       </td>
 
-                      <td class="text-xs-center" >
-                        {{todate(props.item.timeToUnlockAll)}}
-                      </td>
                       
                       <td class="text-xs-center" >
                         {{ web3.utils.fromWei(props.item.balance) }}
                       </td>
 
                       <td class="text-xs-center" >
-                        {{ web3.utils.fromWei(web3.utils.toBN(props.item.balance).sub(web3.utils.toBN(props.item.unlocked))) }}<!-- 待解锁 -->
-                      </td>
+                        {{ (web3.utils.fromWei(props.item.unlock)) }}
 
-                      <td class="text-xs-center" >
-                        {{ (web3.utils.fromWei(props.item.unlocked)) }}
-
-                        <v-btn  :disabled="viewmodel"  small flat  color="info"  outline style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_withdraw=true;dialog_item=props.item;wallet.withdraw=(web3.utils.fromWei(props.item.unlocked))">提取</v-btn>
+                        <v-btn  :disabled="viewmodel"  small flat  color="info"  outline style="padding:0;height: 25px;min-width: 40px;font-size: 12px;" @click="dialog_withdraw=true;dialog_item=props.item;wallet.withdraw=(web3.utils.fromWei(props.item.unlock))">提取</v-btn>
                         
                       </td>
 
@@ -89,45 +84,6 @@
 
       </v-container>
       
-      <v-dialog v-model="dialog" max-width="450">
-        <v-card>
-          <v-card-title class="headline">New Wallet</v-card-title>
-  
-          <v-card-text>
-            <v-text-field v-model="wallet.Manager" label="Manager"></v-text-field>  
-            <v-text-field v-model="wallet.Owner" label="Owner"></v-text-field>  
-            <v-text-field v-model="wallet.TimeToStartUnlocking" label="TimeToStartUnlocking (timestamp)"></v-text-field>  
-            <v-text-field v-model="wallet.TimeInterval" label="TimeInterval (secs)"></v-text-field>  
-            
-            <v-text-field v-model="wallet.AmountOfEachUnlock" label="AmountOfEachUnlock (KAL)"></v-text-field>  
-            <v-text-field v-model="wallet.TimeToUnlockAll" label="TimeToUnlockAll (timestamp)"></v-text-field>  
-
-          </v-card-text>
-  
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="info" @click="creatWallet">Send</v-btn>
-            <v-btn color="error" @click="dialog = false">Cancel</v-btn>
-
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <v-dialog v-model="dialog_replaceManager" max-width="450">
-        <v-card>
-          <v-card-title class="headline">Replace Manager</v-card-title>
-  
-          <v-card-text>
-            <v-text-field v-model="wallet.Manager" label="New Manager"></v-text-field>  
-          </v-card-text>
-  
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="info" @click="replaceManager">Send</v-btn>
-            <v-btn color="error" @click="dialog_replaceManager = false">Cancel</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
       <v-dialog v-model="dialog_replaceOwner" max-width="450">
         <v-card>
@@ -165,54 +121,19 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog_sendTransaction" max-width="450">
-        <v-card>
-          <v-card-title class="headline">Send Transaction</v-card-title>
-  
-          <v-card-text>
-            <v-text-field v-model="wallet.Value" label="Value (KAL)"></v-text-field>  
-
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="info" @click="sendTransaction">Send</v-btn>
-            <v-btn color="error" @click="dialog_sendTransaction = false">Cancel</v-btn>
-
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
       
       <v-dialog v-model="dialog_withdraw" max-width="450">
         <v-card>
           <v-card-title class="headline">Withdraw</v-card-title>
   
           <v-card-text>
-            <v-text-field v-model="wallet.withdraw" label="Value (KAL)"></v-text-field>
+            全部提取: {{wallet.withdraw}} KAL
           </v-card-text>
 
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="info" @click="withdraw">Send</v-btn>
             <v-btn color="error" @click="dialog_withdraw = false">Cancel</v-btn>
-
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-
-      <v-dialog v-model="dialog_revoke" max-width="450">
-        <v-card>
-          <v-card-title class="headline">Revoke</v-card-title>
-  
-          <v-card-text>
-            <v-text-field v-model="wallet.revoke" label="Value (KAL)"></v-text-field>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="info" @click="revoke">Send</v-btn>
-            <v-btn color="error" @click="dialog_revoke = false">Cancel</v-btn>
 
           </v-card-actions>
         </v-card>
@@ -229,10 +150,8 @@
         { text: 'Miner', value: 'miner',sortable: false ,align: 'center'},
         { text: 'StartUnlocking', value: 'timeToStartUnlocking',sortable: false ,align: 'center'},
         { text: 'TimeInterval', value: 'timeInterval',sortable: false ,align: 'center'},
-        { text: 'UnlockAll', value: 'timeToUnlockAll',sortable: false ,align: 'center'},
         
         { text: 'Balance (KAL)', value: 'balance',sortable: false ,align: 'center'},
-        { text: '待解锁 (KAL)', value: 'locked',sortable: false ,align: 'center'},
         { text: '待提取 (KAL)', value: 'unlocked',sortable: false ,align: 'center'},
         { text: '已提取 (KAL)', value: 'totalWithdrawals',sortable: false ,align: 'center'},
       ]
@@ -247,12 +166,9 @@
         web3:null,
         viewmodel:false,
         dialog:false,
-        dialog_replaceManager:false,
         dialog_replaceOwner:false,
         dialog_registerminer:false,
-        dialog_sendTransaction:false,
         dialog_withdraw:false,
-        dialog_revoke:false,
         dialog_item:null,
         timer:null,
         now:0,
@@ -339,10 +255,6 @@
         var vue = this;
         _creatWallet(vue)
       },
-      replaceManager(){
-          var vue = this;
-          _replaceManager(vue)
-      },
       replaceOwner(){
           var vue = this;
           _replaceOwner(vue)
@@ -351,17 +263,9 @@
           var vue = this;
           _registerMiner(vue)
       },
-      sendTransaction(){
-          var vue = this;
-          _sendTransaction(vue);
-      },
       withdraw(){
           var vue = this;
           _withdraw(vue);
-      },
-      revoke(){
-          var vue = this;
-          _revoke(vue);
       },
       todate(ns){
         return _todate(ns);
@@ -409,45 +313,7 @@
     }
     return n;
   }
-    async function _replaceManager(vue){
-        var walletAddress = vue.dialog_item.address;
-        var tmpweb3 = vue.web3;
-        var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:Address});
-        var Address = vue.account;
-        var newManager = vue.wallet.Manager;
-        var index = vue.walletlist.indexOf(vue.dialog_item)
-
-        var ok = wallet.methods.replaceManager(newManager).call({from:Address});
-        if(!ok){
-            alert("Replace Manager failed!please check params");
-            return;
-        }
-        var data = wallet.methods.replaceManager(newManager).encodeABI();
-        const transactionParameters = {
-            from: Address, // must match user's active address.
-            to: walletAddress, // Required except during contract publications.
-            value: '0x0', // Only required to send ether to the recipient from the initiating external account.
-            data: data, // Optional, but used for defining 
-            gas:"0xf4240",
-        }
-
-        var txhash = ethereum.send({
-            method: 'eth_sendTransaction',
-            params: [transactionParameters],
-            from: vue.account,
-        }, async function (err, result) {
-            if(result.result != undefined){
-                if(window.txlist == null){
-                    window.txlist = [];
-                }
-                web3.eth.getTransaction(result.result,function (err, result) {
-                    window.txlist.push(result)
-                })
-            }
-            vue.dialog_replaceManager = false;
-        })
-    }
-    
+  
     async function _replaceOwner(vue){
         var walletAddress = vue.dialog_item.address;
         var tmpweb3 = vue.web3;
@@ -456,7 +322,10 @@
         var newOwner = vue.wallet.Owner;
         var index = vue.walletlist.indexOf(vue.dialog_item)
 
-        var ok = wallet.methods.replaceOwner(newOwner).call({from:Address});
+        var ok = 0;
+        try{
+          ok = wallet.methods.replaceOwner(newOwner).call({from:Address});
+        }catch(e){}
         if(!ok){
             alert("Replace Manager failed!please check params");
             return;
@@ -534,196 +403,51 @@
             vue.dialog_registerminer = false;
         })
     }
-    async function _sendTransaction(vue){
-        var from = vue.account;
-        var walletAddress = vue.dialog_item.address;
-        var tmpweb3 = vue.web3;
-        var index = vue.walletlist.indexOf(vue.dialog_item);
 
-        var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:from});
-        var balance = await tmpweb3.eth.getBalance(from);
+    async function _withdraw(vue){
+      var walletAddress = vue.dialog_item.address;
+      var tmpweb3 = vue.web3;
+      
+      var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:Address});
+      var Address = vue.account;
 
-        if (balance < tmpweb3.utils.toWei(vue.wallet.Value)){
-            alert("Insufficient Balance");
-            return;
-        }
-        var value = tmpweb3.utils.toWei(vue.wallet.Value);//new window.BN(vue.wallet.Value*1e18,10);window.
-        value = tmpweb3.utils.toBN(value).toString(16);
-        const transactionParameters = {
-            to: walletAddress, // Required except during contract publications.
-            value: value, // Only required to send ether to the recipient from the initiating external account.
-            from:from,
-            gas:"0x186a0",
-        }
+      var unlock = 0;
+      try{
+        unlock =  await wallet.methods.unlock().call({from:Address});
+      }catch(e){
+        console.log(e)
+      }
 
-        var txhash = ethereum.send({
-            method: 'eth_sendTransaction',
-            params: [transactionParameters],
-            from: vue.account,
-        }, async function (err, result) {
-            if(result.result != undefined){
-                if(window.txlist == null){
-                    window.txlist = [];
-                }
-                web3.eth.getTransaction(result.result,function (err, result) {
-                    window.txlist.push(result)
-                })
-            }
-            //_updatewallet(vue,index,wallet);
-            tmpweb3.eth.getBalance(walletAddress).then(function(balance){
-                //alert(balance);
-                vue.walletlist[index].balance = balance;
-            })
-            vue.dialog_sendTransaction = false;
-        })
-    }
-  async function _revoke(vue){
-    var walletAddress = vue.dialog_item.address;
-    var tmpweb3 = vue.web3;
-    
-    var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:Address});
-    var Address = vue.account;
-    var index = vue.walletlist.indexOf(vue.dialog_item);
+      if(unlock == 0){
+        alert("Withdraw failed!");
+        return false;
+      }
 
-    var value = tmpweb3.utils.toWei(vue.wallet.revoke.toString(10));
-
-    var ok = false;
-    try{
-      ok =  await wallet.methods.revoke(value).call({from:Address});
-    }catch(e){
-      console.log(e)
+      var data = wallet.methods.unlock().encodeABI();
+          const transactionParameters = {
+              from: Address, // must match user's active address.
+              to: walletAddress, // Required except during contract publications.
+              value: '0x0', // Only required to send ether to the recipient from the initiating external account.
+              data: data, // Optional, but used for defining 
+              gas:"0xf4240",
+          }
+          var txhash = ethereum.send({
+              method: 'eth_sendTransaction',
+              params: [transactionParameters],
+              from: vue.account,
+          }, async function (err, result) {
+              if(result.result != undefined){
+                  if(window.txlist == null){
+                      window.txlist = [];
+                  }
+                  web3.eth.getTransaction(result.result,function (err, result) {
+                      window.txlist.push(result)
+                  })
+              }
+              vue.dialog_withdraw = false;
+          })
     }
 
-    if(!ok){
-      alert("Revoke failed!");
-      return false;
-    }
-    var data = wallet.methods.revoke(value).encodeABI();
-    const transactionParameters = {
-            from: Address, // must match user's active address.
-            to: walletAddress, // Required except during contract publications.
-            value: '0x0', // Only required to send ether to the recipient from the initiating external account.
-            data: data, // Optional, but used for defining 
-            gas:"0xf4240",
-        }
-        var txhash = ethereum.send({
-            method: 'eth_sendTransaction',
-            params: [transactionParameters],
-            from: vue.account,
-        }, async function (err, result) {
-            if(result.result != undefined){
-                if(window.txlist == null){
-                    window.txlist = [];
-                }
-                web3.eth.getTransaction(result.result,function (err, result) {
-                    window.txlist.push(result)
-                })
-            }
-            
-            vue.dialog_revoke = false;
-        })
-  }
-
-  async function _withdraw(vue){
-    var walletAddress = vue.dialog_item.address;
-    var tmpweb3 = vue.web3;
-    
-    var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:Address});
-    var Address = vue.account;
-    var index = vue.walletlist.indexOf(vue.dialog_item);
-    var value = tmpweb3.utils.toWei(vue.wallet.withdraw.toString(10));
-  
-    var ok = false;
-    try{
-      ok =  await wallet.methods.withdraw(value).call({from:Address});
-    }catch(e){
-      console.log(e)
-    }
-
-    if(!ok){
-      alert("Withdraw failed!");
-      return false;
-    }
-
-    var data = wallet.methods.withdraw(value).encodeABI();
-        const transactionParameters = {
-            from: Address, // must match user's active address.
-            to: walletAddress, // Required except during contract publications.
-            value: '0x0', // Only required to send ether to the recipient from the initiating external account.
-            data: data, // Optional, but used for defining 
-            gas:"0xf4240",
-        }
-        var txhash = ethereum.send({
-            method: 'eth_sendTransaction',
-            params: [transactionParameters],
-            from: vue.account,
-        }, async function (err, result) {
-            if(result.result != undefined){
-                if(window.txlist == null){
-                    window.txlist = [];
-                }
-                web3.eth.getTransaction(result.result,function (err, result) {
-                    window.txlist.push(result)
-                })
-            }
-            vue.dialog_withdraw = false;
-        })
-  }
-
-    async function _creatWallet(vue){
-        var tmpweb3 = vue.web3;
-        var factory = new tmpweb3.eth.Contract(window.Factoryabi,window.FactoryAddress,{from: vue.account});
-
-        var ok = await factory.methods.create(
-            vue.wallet.Manager,
-            vue.wallet.Owner,
-            vue.wallet.TimeToStartUnlocking,
-            vue.wallet.TimeInterval,
-
-            tmpweb3.utils.toWei(vue.wallet.AmountOfEachUnlock.toString(10)),
-
-            vue.wallet.TimeToUnlockAll).call();
-
-        if(!ok){
-            alert("create wallet failed!please check params");
-            return;
-        }
-        
-        var data = factory.methods.create(
-            vue.wallet.Manager,
-            vue.wallet.Owner,
-            vue.wallet.TimeToStartUnlocking,
-            vue.wallet.TimeInterval,
-       
-            tmpweb3.utils.toWei(vue.wallet.AmountOfEachUnlock.toString(10)),
-            vue.wallet.TimeToUnlockAll).encodeABI();
-
-        const transactionParameters = {
-            from: vue.account, // must match user's active address.
-            to: factory.options.address, // Required except during contract publications.
-            value: '0x0', // Only required to send ether to the recipient from the initiating external account.
-            data: data, // Optional, but used for defining 
-            gas:"0xf42400",
-        }
-
-        var txhash = ethereum.send({
-            method: 'eth_sendTransaction',
-            params: [transactionParameters],
-            from: vue.account,
-        }, async function (err, result) {
-            if(result.result != undefined){
-                if(window.txlist == null){
-                    window.txlist = [];
-                }
-                web3.eth.getTransaction(result.result,function (err, result) {
-                  
-                    window.txlist.push(result)
-                })
-                vue.dialog = false;
-            }
-            vue.dialog = false;
-        })
-    }
     async function _updatewallet(vue,index,wallet){
         var tmpweb3 = vue.web3;
         var miner = new tmpweb3.eth.Contract(window.minerabi,window.mineraddress);
@@ -731,10 +455,14 @@
         var address = vue.walletlist[index]["address"];
         vue.walletlist[index]["owner"]      = await wallet.methods.owner().call();
         vue.walletlist[index]["manager"]    = await wallet.methods.manager().call();
-        vue.walletlist[index]["amountOfEachUnlock"] = await wallet.methods.amountOfEachUnlock().call();
+        var creator = await wallet.methods.creator().call();
+        vue.walletlist[index]["creator"] = creator;
+        vue.walletlist[index]["miner"]      = await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
+        vue.walletlist[index]["timeInterval"] = await wallet.methods.timeInterval().call();
         vue.walletlist[index]["totalWithdrawals"] = await wallet.methods.totalWithdrawals().call();
         vue.walletlist[index]["balance"] = await tmpweb3.eth.getBalance(address),
-        vue.walletlist[index]["unlocked"] = await wallet.methods.unlocked().call();
+        vue.walletlist[index]["unlock"] = await wallet.methods.unlock().call({from:creator});
+        vue.walletlist[index]["lastUnlockTime"] = await wallet.methods.lastUnlockTime().call();
         vue.walletlist[index]["miner"] = "";
         var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
         if(!isminer){
@@ -773,19 +501,23 @@
 
       for(var i=0; i < wallets.length; i++){
           var wallet = new tmpweb3.eth.Contract(window.Walletabi,wallets[i],{from:Address});
-          vue.walletlist.push({
-              address:wallets[i],
-              owner: await wallet.methods.owner().call(),
-              manager:await wallet.methods.manager().call(),
-              miner: "",
-              timeToStartUnlocking:await wallet.methods.timeToStartUnlocking().call(),
-              timeInterval:await wallet.methods.timeInterval().call(),
-              timeToUnlockAll:await wallet.methods.timeToUnlockAll().call(),
-              amountOfEachUnlock:await wallet.methods.amountOfEachUnlock().call(),
-              totalWithdrawals:await wallet.methods.totalWithdrawals().call(),
-              balance:await tmpweb3.eth.getBalance(wallets[i]),
-              unlocked:await wallet.methods.unlocked().call(),
-            })
+          var creator = await wallet.methods.creator().call();
+            var lastUnlockTime = await wallet.methods.lastUnlockTime().call();
+            vue.walletlist.push({
+                address:wallets[i],
+                owner: await wallet.methods.owner().call(),
+                manager:await wallet.methods.manager().call(),
+                creator:creator,
+                miner: await miner.methods.isMinerOfHeight(height,wallets[i]).call(),
+                timeToStartUnlocking:await wallet.methods.timeToStartUnlocking().call(),
+                timeInterval:await wallet.methods.timeInterval().call(),
+                totalWithdrawals:await wallet.methods.totalWithdrawals().call(),
+                balance:await tmpweb3.eth.getBalance(wallets[i]),
+                unlock:await wallet.methods.unlock().call({from:creator}),
+                lastUnlockTime:lastUnlockTime,
+                numInterval:await wallet.methods.numInterval().call(),
+                unlockedTime:await wallet.methods.timeToInterval(lastUnlockTime).call(),
+              })
           var address = wallets[i];
           var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
           if(!isminer){
@@ -829,18 +561,22 @@
           for(var i=lwallet; i < wallets.length; i++){
               //var wallet = web3.eth.contract(window.Walletabi).at(wallets[i]);
               var wallet = new tmpweb3.eth.Contract(window.Walletabi,wallets[i]);
+              var creator = await wallet.methods.creator().call();
+              var lastUnlockTime = await wallet.methods.lastUnlockTime().call();
               vue.walletlist.push({
                   address:wallets[i],
                   owner: await wallet.methods.owner().call(),
                   manager:await wallet.methods.manager().call(),
-                  miner: "",
+                  creator:creator,
+                  miner: await miner.methods.isMinerOfHeight(height,wallets[i]).call(),
                   timeToStartUnlocking:await wallet.methods.timeToStartUnlocking().call(),
                   timeInterval:await wallet.methods.timeInterval().call(),
-                  timeToUnlockAll:await wallet.methods.timeToUnlockAll().call(),
-                  amountOfEachUnlock:await wallet.methods.amountOfEachUnlock().call(),
                   totalWithdrawals:await wallet.methods.totalWithdrawals().call(),
                   balance:await tmpweb3.eth.getBalance(wallets[i]),
-                  unlocked:await wallet.methods.unlocked().call(),
+                  unlock:await wallet.methods.unlock().call({from:creator}),
+                  lastUnlockTime:lastUnlockTime,
+                  numInterval:await wallet.methods.numInterval().call(),
+                  unlockedTime:await wallet.methods.lastUnlockTime().call(),
                 })
                 var address = wallets[i];
                 var isminer =  await miner.methods.isMinerOfHeight((Math.floor((height/1000000))+1)*1000000-10,address).call();
