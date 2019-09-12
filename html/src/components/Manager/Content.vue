@@ -445,7 +445,7 @@
         var wallet = new tmpweb3.eth.Contract(window.Walletabi,walletAddress,{from:from});
         var balance = await tmpweb3.eth.getBalance(from);
 
-        if (balance < vue.web3.utils.toWei(vue.wallet.Value)){
+        if ( tmpweb3.utils.toBN(balance).lt(tmpweb3.utils.toBN(tmpweb3.utils.toWei(vue.wallet.Value.toString()))) ){
             alert("Insufficient Balance");
             return;
         }
