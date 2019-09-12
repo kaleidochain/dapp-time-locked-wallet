@@ -28,7 +28,7 @@ contract TimeLockedWallet {
     event Withdrew(address owner,uint256 value);
     event OwnerReplaced(address owner,address newOwner);
     event CreatorReplaced(address creator,address newCreator);
-    event MinerRegistered(address owner);
+    event MinerRegistered(address bywho);
 
     event Revocation(address _manager,uint _value);
     event ManagerReplaced(address manager,address newManager);
@@ -161,7 +161,7 @@ contract TimeLockedWallet {
     function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public onlyOwner returns(bool suc){
         suc = Miner(0x1000000000000000000000000000000000000002).set(start, lifespan, address(this), vrfVerifier,voteVerifier);
         if(suc){
-            emit MinerRegistered(owner);
+            emit MinerRegistered(msg.sender);
         }
         return suc;
     }
