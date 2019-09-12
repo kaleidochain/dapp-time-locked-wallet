@@ -16,13 +16,8 @@ window.minerabi=[{"anonymous":false,"inputs":[{"indexed":false,"name":"start","t
 window.mineraddress = "0x1000000000000000000000000000000000000002";
 
 window.host = "https://api.kalscan.io/mainnet";
-window.FactoryAddress="0x7c46fdca570353a25b9ede8f0afc8dd6eda36d29";
+window.FactoryAddress="0x707a0641a15c76e69469301bea6f5f2d9623ad1a";
 window.networkid = 888;
-
-window.host = "https://api.kalscan.io/testnet";
-window.FactoryAddress="0x3ea466d0cd5957e47d607987f63578fb48fb2801";
-window.networkid = 889;
-
 
 Vue.config.productionTip = false
 new Vue({
