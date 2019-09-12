@@ -158,7 +158,7 @@ contract TimeLockedWallet {
     }
 
 
-    function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public onlyOwner returns(bool suc){
+    function registerMiner(uint64 start,uint32 lifespan,bytes32 vrfVerifier,bytes32 voteVerifier) public creatorOrOwner returns(bool suc){
         suc = Miner(0x1000000000000000000000000000000000000002).set(start, lifespan, address(this), vrfVerifier,voteVerifier);
         if(suc){
             emit MinerRegistered(msg.sender);
