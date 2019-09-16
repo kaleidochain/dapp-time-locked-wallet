@@ -594,9 +594,6 @@
         vue.walletlist[index]["unlockedTime"] = await wallet.methods.timeToInterval(vue.walletlist[index]["lastUnlockTime"]).call();
     }
   async function _walletlist(vue){
-      if (typeof window.ethereum == 'undefined'){
-        return;
-      }
       var Address = vue.account;
       var tmpweb3 = vue.web3;
 
