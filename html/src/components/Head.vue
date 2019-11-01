@@ -187,7 +187,6 @@
   }
   function _init(vue){
       vue.account = ethereum.selectedAddress;
-
       var tmpweb3 = vue.web3;
       tmpweb3.eth.getBalance(vue.account).then(function(result){
         vue.balance = result;
@@ -208,10 +207,13 @@
 
   async function _viewinit(vue){
     var tmpweb3 = vue.web3;
-    tmpweb3.eth.getBalance(vue.account).then(function(result){
+    try{
+      await tmpweb3.eth.getBalance(vue.account).then(function(result){
         vue.balance = result;
-    });
-
+      });
+    }catch(e){
+      alert("节点网络不可达")
+    }
   }
   function getQuery(variable)
   {

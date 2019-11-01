@@ -483,9 +483,6 @@
         }
     }
   async function _walletlist(vue){
-      if (typeof window.ethereum == 'undefined'){
-        return;
-      }
       var Address = vue.account;
       var tmpweb3 = vue.web3;
       var netid = await tmpweb3.eth.net.getId();

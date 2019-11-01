@@ -31,7 +31,7 @@
                       <td class="text-xs-center">
                         <span style="vertical-align: middle;max-width: 80px; display: inline-block; overflow: hidden; text-overflow: ellipsis;">{{ props.item.creator }}</span>
 
-                        <v-btn  small outline color="info" style="padding:0;height: 25px;min-width: 40px;" @click="dialog_replaceCreator = true;dialog_item=props.item;">
+                        <v-btn  :disabled="viewmodel" small outline color="info" style="padding:0;height: 25px;min-width: 40px;" @click="dialog_replaceCreator = true;dialog_item=props.item;">
                             编辑
                         </v-btn>
 
@@ -546,9 +546,6 @@
         //总的解锁次数
     }
     async function _walletlist(vue){
-        if (typeof window.ethereum == 'undefined'){
-          return;
-        }
         var Address = vue.account;
         var tmpweb3 = vue.web3;
         var netid = await tmpweb3.eth.net.getId();
