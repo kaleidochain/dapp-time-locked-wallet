@@ -159,9 +159,8 @@ contract TimeLockedPool {
     }
 
     function() public onlyCreator payable {
-        if(msg.value > 0){
-            emit Deposit(msg.sender, msg.value);
-        }
+        require(msg.value > 0);
+        emit Deposit(msg.sender, msg.value);
     }
 
     function revoke(uint _value) onlyManager public returns(bool){
