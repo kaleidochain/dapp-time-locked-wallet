@@ -7,6 +7,7 @@ contract Miner {
 
 contract TimeLockedPool {
     uint constant precision = 10000000;
+    uint constant maxOwner = 100;
 
     address public creator;
     address public manager;
@@ -89,6 +90,7 @@ contract TimeLockedPool {
             remove(owners, msg.sender);
         }
         if (proportions[to] == 0) {
+            require(owners.length < maxOwner);
             owners.push(to);
         }
         proportions[msg.sender] = left;
