@@ -80,13 +80,16 @@ contract TimeLockedPool {
 
     function transfer(address to, uint prop) public {
         uint total = proportions[msg.sender];
-        require(total != 0 && prop <= total);
+        require(total != 0 && prop != 0 && prop <= total);
         uint sum = proportions[to] + prop;
         require(sum >= prop);
 
         uint left = total - prop;
         if (left == 0) {
             remove(owners, msg.sender);
+        }
+        if (proportions[to] == 0) {
+            owners.push(to);
         }
         proportions[msg.sender] = left;
         proportions[to] = sum;
