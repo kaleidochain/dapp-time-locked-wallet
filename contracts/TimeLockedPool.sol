@@ -24,7 +24,7 @@ contract TimeLockedPool {
 
     event Deposit(address sender,uint256 value);
     event Unlocked(uint256 value);
-    event Transfer(address from,address to, uint value);
+    event TransferProportion(address from,address to, uint value);
     event CreatorReplaced(address creator,address newCreator);
     event MinerRegistered(address bywho);
 
@@ -79,7 +79,7 @@ contract TimeLockedPool {
         return true;
     }
 
-    function transfer(address to, uint prop) public {
+    function transferProportion(address to, uint prop) public {
         uint total = proportions[msg.sender];
         require(total != 0 && prop != 0 && prop <= total);
         uint sum = proportions[to] + prop;
@@ -97,7 +97,7 @@ contract TimeLockedPool {
         proportions[to] = sum;
 
 
-        emit Transfer(msg.sender, to, prop);
+        emit TransferProportion(msg.sender, to, prop);
     }
 
     // [0, numInterval]
