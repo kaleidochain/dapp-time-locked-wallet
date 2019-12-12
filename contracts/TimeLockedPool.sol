@@ -79,7 +79,7 @@ contract TimeLockedPool {
         return true;
     }
 
-    function transferProportion(address to, uint prop) public {
+    function transferProportion(address to, uint prop) public returns(bool){
         require(to != 0x0);
         require(prop > 0);
         require(proportions[msg.sender] >= prop);
@@ -100,6 +100,7 @@ contract TimeLockedPool {
         assert(proportions[to] >= prop); // check overflow
 
         emit TransferProportion(msg.sender, to, prop);
+        return true;
     }
 
     // [0, numInterval]
